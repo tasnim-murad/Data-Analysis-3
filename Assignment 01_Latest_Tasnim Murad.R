@@ -49,10 +49,8 @@ cps_earn <- read_csv(paste0(data_in,'morg-2014-emp.csv'),
                                       state = "c"))
 janitor::tabyl(cps_earn$state)
 
-
 # check the data table
 glimpse(cps_earn)
-
 
 #SELECT OCCUPATION
 # Pick a occupation types: Healthcare practitioner and technical occupations
@@ -78,14 +76,14 @@ tabulate(cps_earn$sex)
 table(cps_earn$occ2012,cps_earn$sex)
 
 
-# condition by class
+# condition by class( Work in Public or Private organization)
 cps_earn <- cps_earn %>%
   mutate(class_govt = ifelse(class=="Government - Federal" | 
                                class=="Government - Local" | class=="Government-State", 1,0),
          class_private = ifelse(class=="Private, For Profit" | class=="Private, Nonprofit", 1,0))
          
 
-# condition by ownchild
+# condition by ownchild (Whether has a child or not)
 cps_earn <- cps_earn %>%
   mutate(haskid = ifelse(ownchild>=1, 1,0))
 
@@ -97,12 +95,10 @@ cps_earn %>%
          cumulative_percent = cumsum(frequency)/sum(frequency)*100)
 
 # Generate Education Category
-
 cps_earn <- cps_earn %>% mutate(ed_MA=as.numeric(grade92==44),
                       ed_Profess = as.numeric(grade92==45),
                       ed_PhD = as.numeric(grade92==46)
 )
-
 
 #Overview of the variables
 
@@ -122,8 +118,6 @@ kable(description, caption = "Description of the main variables in the cleaned d
 datasummary( age+ wage + female+ haskid+ class_govt+ class_private + ed_MA + ed_Profess + ed_PhD ~
                mean + Median + Min + Max + P25 + P75 + N , data = cps_earn )%>%
   kableExtra::kable_styling(latex_options = "hold_position")
-
-
 
 ###################################
 # Linear regressions
@@ -186,10 +180,6 @@ stargazer(regr[[1]],regr[[2]], regr[[3]], regr[[4]], type="text", title = "Regre
           out=paste(data_in,"Table_02.txt",sep=""), digits=2, float = F, no.space = T)
 
 
-
-#All models
-#######################
-
 eval <- data.frame(models, k, RSquared, RMSE, BIC)
 eval <- eval %>%
   mutate(models = paste0("(",gsub("reg","",models),")")) %>%
@@ -197,15 +187,14 @@ eval <- eval %>%
 stargazer(eval, summary = F, type="text", title = "All model evaluation", out=paste(data_in,"Table_03.txt",sep=""), 
           digits=2, dep.var.caption = "Dep. var: wage",float = F, no.space = T)
 
-
-# could be made nicer, also not producing it here
+# The table in a nicer format
 stargazer(reg1, reg2, reg3, reg4 , align = T,   digits=2, dep.var.caption = "Dep. var: wage", keep.stat = c("rsq","n"),
           type="text", title = "All model Evaluation", out=paste0(data_in,"table_04.txt",sep=""), no.space = T)
 
 
-#################################################################
+######################################
 # Cross-validation(cv)
-
+######################################
 # set number of folds
 k <- 4
 
@@ -245,9 +234,9 @@ stargazer(cv_mat, summary = F, digits=0, float=F, dep.var.caption = "Dep. var: w
           title = "Cross Validation", out=paste(data_in,"table_05.txt",sep=""),no.space = T)
 
 
-
-###############################################################################
-# REGRESSION ANALYSIS with Graph
+################################################
+# Some graphs to evaluate the regression
+###############################################
 
 # lowess
 Evaluation_graph01<- ggplot(data = cps_earn, aes(x=age, y=wage)) +
@@ -319,7 +308,7 @@ log_na <- is.na( cps_earn$p4a )
 rmse4 <- RMSE(cps_earn$p4a[!log_na],cps_earn$wage[!log_na])
 rmse4
 
-# Result summary
+# Result summary (prediction with 95% interval)
 sum1 <- cbind(t(pred3_new[,c(1,3,4)]), t(pred4_new[,c(1,3,4)]))
 colnames(sum1) <- c('Model3', 'Model4')
 rownames(sum1) <- c('Predicted', 'PI_low (95%)', 'PI_high (95%)')
@@ -329,7 +318,7 @@ sum1
 stargazer(sum1, summary = F, digits=0, float=F, type="text", out=paste(data_in,"table06.txt",sep=""))
 
 
-# prediction with 80%
+# prediction with 80% interval
 
 # summary of predictions and PI 80% version
 # predict value for newly added obs
@@ -348,5 +337,12 @@ sum2
 
 stargazer(sum2, summary = F, digits=0, float=F, type="text",  out=paste(data_in,"Table07.txt",sep=""))
 
-
+### Conclusion:
+#Model 3 and model 4 have comparatively higher R square value and lower RMSE and BIC. So, either of the model should be best model to predict earnings 
+#per hour of the respondents. Evaluating by 4-fold cross validation, similarly we find lower Root Mean Squared Error (RMSE) for Model 3 and model 4.  
+# By comparing predicted value at 80% and 95% prediction interval, we can take decision for the best model.Since, the range of interval is comparatively 
+#lower in case of Model 4, we can conclude that, Model 4 is the best model to predict Earnings per hour. Finally, more complex model has more variables 
+#that might generate higher R-Square but might not give best MSE in the live data. While predicting live data, I found the RMSE 15.34 which is also sort of 
+#similar to for the analysis with original data. So, overfitting or underfitting is not observed for model 4. Therefore, we can conclude that performance of Model 4 
+#is not affected for model complexity.
 ################## The End ################
