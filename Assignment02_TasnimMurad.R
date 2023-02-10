@@ -17,33 +17,20 @@ rm(list=ls())
 # Import libraries 
 # Descriptive statistics and regressions
 library(tidyverse)
-library(ggplot2)
 library(skimr)
 library(knitr)
 library(glmnet)
-library(xtable)
 library(huxtable)
 library(kableExtra)
 library(modelsummary)
 library(funModeling)
-library(directlabels)
-library(arm)
 library(lmtest)
 library(fixest)
 library(texreg)
-library(estimatr)
-library(sandwich)
-library(segmented)
-library(lspline)
-library(cowplot)
 library(stargazer)
-library(grid)
-library(haven)
 library(Hmisc)
 library(caret)
 library(RColorBrewer)
-library(unikn)
-library(ranger)
 
 if (!require(rattle)){
   install.packages('rattle')
@@ -255,9 +242,6 @@ graph_01 <- ggplot(df, aes(x = factor(guest_hosting), y = price,
   theme(legend.position = c(0.3,0.8) )
 
 graph_01
-
-save_fig("ch14-figure4b-airbnb-accom", output, "small")
-
 
 #####################
 # OLS Regression 
@@ -616,4 +600,7 @@ dimnames = list(c("Model A", "Model B","Model B auto"),
 kable(x = result_2, format = "latex", digits = 3) %>%
   cat(.,file= paste0(data_in,"rf_models_rmse.tex"))
 
-
+Decision: From the analysis, it is found that RMSE is lowwer in case of Random Forest and R squared value
+is higher followed by LASSO and OLS regression model. So, Random Forest model can give more fit result. 
+Since, I faced problems to generate more variables for random forest, more trees were not possible to run. 
+Still I find, random forest gives the best prediction.
