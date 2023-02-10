@@ -1,7 +1,10 @@
 #######################################
 ###Tasks
 #######################################
-
+#Your task will be to help a company operating small and mid-size apartments hosting 2-6 guests. 
+#The company is set to price their new apartments not on the market. 
+#Build a price prediction model similarly to how we did in our case study for London. 
+#Discuss your modeling decisions and compare your results to those of the case study. 
 #Have at least 3 different models and compare performance
 #Argue for your choice of models
 #One model must be Random Forest or any boosting algorithm
@@ -339,13 +342,13 @@ reviews <- c("reviews_per_month_n","number_of_reviews_n","review_scores_rating",
 # Higher orders
 poly_lev <- c("guest_hosting2", "bathrooms2")
 
-#not use p_host_response_rate due to missing obs
+#not use p_host_response_rate due to missing observations
 
 # Dummy variables: 
 dummy_lev <- c("host_is_superhost", "instant_bookable", "m_host_response_time", "m_host_location", "m_availability")
                
 ##
-# b) create the interaction terms
+#  create the interaction terms
 
 X1  <- c('bath_type*beds_n',  'bath_type*guest_hosting', 'm_availability*bath_type', 'instant_bookable*bath_type')
 
@@ -363,7 +366,7 @@ X2  <- c(paste0('(bath_type + beds_n) * (',
 # create a holdout set (20% of observations)
 smp_size <- floor(0.2 * nrow(barcelona))
 
-# Set the random number generator: It will make results reproducable
+# Set the random number generator:
 set.seed(20180123)
 
 # create ids:
@@ -459,8 +462,7 @@ print(lasso_cv_rmse[1, 1])
 
 set.seed(2801)
 
-# First pick a smaller than usual training set so that models run faster and check if works
-# If works, start anew without these two lines
+# First pick a smaller than usual training set so that models run faster
 
 # try <- createDataPartition(barcelona$price, p = 0.2, list = FALSE)
 #data <- data[try, ]
@@ -557,7 +559,7 @@ rf_model_2
 
 rf_model_2auto <-rf_model_2
 
-# evaluate random forests -------------------------------------------------
+# evaluate random forests
 
 results <- resamples(
   list(
@@ -569,7 +571,7 @@ results <- resamples(
 )
 summary(results)
 
-# Save outputs -------------------------------------------------------
+# Save outputs
 
 # Show Model B rmse shown with all the combinations
 rf_tuning_modelB <- rf_model_2$results %>%
