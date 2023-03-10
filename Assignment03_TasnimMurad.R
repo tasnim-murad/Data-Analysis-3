@@ -43,6 +43,7 @@ library(fixest)
 library(texreg)
 library(estimatr)
 library(stargazer)
+library(kableExtra)
 
 library(rattle)
 library(caret)
@@ -214,6 +215,7 @@ data <- data %>%
 summary(data$total_assets_bs)
 
 
+
 pl_names <- c("extra_exp","extra_inc",  "extra_profit_loss", "inc_bef_tax" ,"inventories",
               "material_exp", "profit_loss_year", "personnel_exp")
 bs_names <- c("intang_assets", "curr_liab", "fixed_assets", "liq_assets", "curr_assets",
@@ -263,7 +265,6 @@ variances<- data %>%
 
 data <- data %>%
   select(-one_of(names(variances)[variances]))
-
 ########################################################################
 # additional
 # including some imputation
@@ -300,7 +301,7 @@ data <- data %>%
   mutate(sales_mil_log_sq=sales_mil_log^2)
 
 
-sales_graph <- ggplot(data = data, aes(x=sales_mil_log, y=as.numeric(default))) +
+sales0_graph <- ggplot(data = data, aes(x=sales_mil_log, y=as.numeric(default))) +
   geom_point(size=2,  shape=20, stroke=2, fill="blue") +
   geom_smooth(method = "lm", formula = y ~ poly(x,2), se = F, size=1)+
   geom_smooth(method="loess", se=F, size=1.5, span=0.9) +
@@ -463,7 +464,7 @@ sum_table <- summary(glm_modelx2) %>%
 kable(x = sum_table, format = "latex", digits = 3,
       col.names = c("Variable", "Coefficient", "dx/dy"),
       caption = "Average Marginal Effects (dy/dx) for Logit Model") %>%
-  cat(.,file= paste0(data_in,"AME_logit_X2.txt"))
+  cat(.,file= paste0(data_in,"AME_logit_X2.tex"))
 
 
 # baseline model is X4 (all vars, but no interactions) -------------------------------------------------------
@@ -494,7 +495,7 @@ sum_table2 <- summary(glm_model) %>%
 kable(x = sum_table2, format = "latex", digits = 3,
       col.names = c("Variable", "Coefficient", "SE", "dx/dy"),
       caption = "Average Marginal Effects (dy/dx) for Logit Model") %>%
-  cat(.,file= paste0(data_in,"AME_logit_X4.txt"))
+  cat(.,file= paste0(data_in,"AME_logit_X4.tex"))
 
 
 ################################################
@@ -643,7 +644,7 @@ logit_summary1 <- data.frame("Number of predictors" = unlist(nvars),
 
 kable(x = logit_summary1, format = "latex", booktabs=TRUE,  digits = 3, row.names = TRUE,
       linesep = "", col.names = c("Number of predictors","CV RMSE","CV AUC")) %>%
-  cat(.,file= paste0(data_in, "logit_summary1.txt"))
+  cat(.,file= paste0(data_in, "logit_summary1.tex"))
 
 
 
@@ -704,11 +705,12 @@ logit_summary2 <- data.frame("Avg of optimal thresholds" = unlist(best_tresholds
                              "Threshold for Fold5" = sapply(logit_cv_threshold, function(x) {x$threshold}),
                              "Avg expected loss" = unlist(expected_loss),
                              "Expected loss for Fold5" = unlist(logit_cv_expected_loss))
+logit_summary2
 
 kable(x = logit_summary2, format = "latex", booktabs=TRUE,  digits = 3, row.names = TRUE,
       linesep = "", col.names = c("Avg of optimal thresholds","Threshold for fold #5",
                                   "Avg expected loss","Expected loss for fold #5")) %>%
-  cat(.,file= paste0(data_in, "logit_summary1.txt"))
+  cat(.,file= paste0(data_in, "logit_summary2.tex"))
 
 
 
@@ -811,8 +813,7 @@ best_tresholds[["rf_p"]] <- mean(unlist(best_tresholds_cv))
 expected_loss[["rf_p"]] <- mean(unlist(expected_loss_cv))
 
 
-rf_summary <- data.frame("CV RMSE" = CV_RMSE[["rf_p"]],
-                         "CV AUC" = CV_AUC[["rf_p"]],
+rf_summary <- data.frame("CV AUC" = CV_AUC[["rf_p"]],
                          "Avg of optimal thresholds" = best_tresholds[["rf_p"]],
                          "Threshold for Fold5" = best_treshold$threshold,
                          "Avg expected loss" = expected_loss[["rf_p"]],
@@ -871,7 +872,8 @@ summary_results <- summary_results %>%
 
 
 kable(x = summary_results, format = "latex", booktabs=TRUE,  digits = 3, row.names = TRUE,
-      linesep = "", col.names = c("Number of predictors", "CV RMSE", "CV AUC",
+      linesep = "", col.names = c("Number of predictors", "CV AUC",
                                   "CV threshold", "CV expected Loss")) %>%
   cat(.,file= paste0(data_in, "summary_results.tex"))
 
+ ##################################################################################################
